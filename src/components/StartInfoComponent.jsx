@@ -1,6 +1,6 @@
 export default function StartInfoComponent() {
   return (
-    <div className="w-3/4">
+    <div className="w-full">
       <div className="mt-4 ml-8 mr-4 ">
         <h1 className="text-3xl font-semibold font-sans antialiased">
           What is Atomic Invoicer?

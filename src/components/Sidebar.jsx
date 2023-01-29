@@ -26,11 +26,11 @@ export default function Sidebar({ selectOptioner, idRender }) {
   };
 
   return (
-    <aside className="bg-cyan-900 flex flex-col h-screen w-1/4 max-w-[250px] items-center rounded-br-xl shadow-xl shadow-black">
+    <aside className="bg-cyan-900 flex flex-col h-screen w-1/4 max-w-[300px] min-w-[225px] items-center rounded-br-xl shadow-xl shadow-black">
       <div className="mt-4 text-lg font-mono">
         <button
           is-option="true"
-          className="bg-gray-800 px-4 py-1 rounded-md text-white w-full shadow-lg shadow-cyan-700"
+          className="bg-gray-800 px-4 py-1 rounded-md text-white w-full shadow-lg shadow-cyan-700 hover:bg-neutral-700 hover:shadow-orange-200 hover:shadow-sm"
           onClick={startInfoPage}
         >
           Atomic Invoicer
