@@ -2,12 +2,15 @@
   "name": "atomic-invoicer",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
-  "main": "public/electron.js",
+  "type": "commonjs",
+  "main": "./dist/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "esbuild-cjs": "esbuild main.js --format=cjs --outfile=./dist/main.js",
+    "electron:dev": "npm run esbuild-cjs && IS_IN_DEVELOPMENT=true electron .",
+    "electron:build": "npm run esbuild-cjs && electron-packager --out=release ."
   },
   "dependencies": {
     "bootstrap-icons": "^1.10.3",
@@ -22,6 +25,8 @@
     "autoprefixer": "^10.4.13",
     "concurrently": "^7.6.0",
     "electron": "^22.0.0",
+    "electron-packager": "^17.1.1",
+    "esbuild": "^0.17.5",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.2.4",
     "vite": "^4.0.0",
