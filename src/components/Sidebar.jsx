@@ -36,8 +36,7 @@ export default function Sidebar({ selectOptioner, idRender }) {
           Atomic Invoicer
         </button>
       </div>
-      <span className="mt-6 bg-cyan-300 w-full h-px"></span>
-      <div className="mt-6 flex flex-col items-center text-base font-mono">
+      <div className="mt-8 flex flex-col items-center text-base font-mono">
         <button
           is-option="true"
           className="mb-6 text-white underline"

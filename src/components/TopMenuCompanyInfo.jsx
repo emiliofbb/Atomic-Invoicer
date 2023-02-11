@@ -2,11 +2,21 @@ import Button from "./ButtonComponent";
 
 export default function TopMenuCompanyInfo() {
   const saveCompanyInfo = () => {
-    console.log("Saved");
+    const name = document.getElementById("company-name").value;
+    const code = document.getElementById("company-code").value;
+    const email = document.getElementById("company-email").value;
+    const phone = document.getElementById("company-phone").value;
+    const address = document.getElementById("company-address").value;
+    window.api.sendCompanyInfo([name, code, email, phone, address]);
   };
 
   const restartCompanyInfo = () => {
-    console.log("Restarted company info");
+    document.getElementById("company-name").value = "";
+    document.getElementById("company-code").value = "";
+    document.getElementById("company-email").value = "";
+    document.getElementById("company-phone").value = "";
+    document.getElementById("company-address").value = "";
+    window.api.sendCompanyInfo(["", "", "", "", ""]);
   };
 
   return (

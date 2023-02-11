@@ -6,7 +6,18 @@ export default function TopMenuInvoice() {
   };
 
   const restartInvoice = () => {
-    console.log("Restarted invoice");
+    document.getElementById("costumer-name").value = "";
+    document.getElementById("costumer-address").value = "";
+
+    document.getElementById("product-name").value = "";
+    document.getElementById("product-quantity").value = "";
+    document.getElementById("product-price").value = "";
+
+    const table = document.getElementById("product-table");
+
+    while (table.firstChild !== null) {
+      table.firstChild.remove();
+    }
   };
 
   return (

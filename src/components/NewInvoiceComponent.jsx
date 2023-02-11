@@ -1,13 +1,19 @@
 import TopMenuInvoice from "./TopMenuInvoice";
+import ClientForm from "./ClientFormComponent";
+import ProductForm from "./ProductForm";
+import { useState } from "react";
+import ProductTable from "./ProductTable";
 
 export default function NewInvoiceComponent() {
+  const [selectedRowId, setSelectedRowId] = useState(-1);
+
   return (
-    <div className="w-full">
+    <div style={{ overflow: "auto" }} className="w-full h-screen">
       <TopMenuInvoice />
-      <div className="mt-4 ml-8 mr-4">
-        <h1 className="text-3xl font-semibold font-sans antialiased">
-          New Invoice window
-        </h1>
+      <ClientForm />
+      <ProductForm selectedRow={selectedRowId} />
+      <div className="px-4">
+        <ProductTable />
       </div>
     </div>
   );

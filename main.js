@@ -1,6 +1,10 @@
-import { app, BrowserWindow } from "electron";
-
+import { app, BrowserWindow, ipcMain, dialog } from "electron";
+import fs from "fs";
 import path from "path";
+
+const Store = require("electron-store");
+
+const store = new Store();
 
 const IS_DEV = process.env.IS_IN_DEVELOPMENT || false;
 
@@ -13,9 +17,10 @@ function createWindow() {
     height: 600,
 
     webPreferences: {
-      nodeIntegration: true,
-
-      enableRemoteModule: true,
+      contextIsolation: true,
+      preload: IS_DEV
+        ? path.join(app.getAppPath(), "./public/preload.js")
+        : path.join(app.getAppPath(), "./dist/preload.js"),
     },
   });
 
@@ -34,10 +39,61 @@ function createWindow() {
     // In all other cases, load the index.html file from the dist folder
 
     win.loadURL(`file://${path.join(__dirname, "..", "dist", "index.html")}`);
+    win.webContents.openDevTools();
   }
 }
 
-app.whenReady().then(createWindow);
+function handleSaveCompanyInfo(event, args) {
+  const companyInfo = {
+    name: args[0],
+    code: args[1],
+    email: args[2],
+    phone: args[3],
+    address: args[4],
+  };
+  store.set("company-info", companyInfo);
+}
+
+function getCompanyInfo(event, args) {
+  const companyInfo = store.get("company-info");
+  if (companyInfo.logoPath !== undefined && companyInfo.logoPath !== "") {
+    companyInfo.logoBase64 = fs
+      .readFileSync(companyInfo.logoPath)
+      .toString("base64");
+  }
+  return companyInfo;
+}
+
+async function handleLogoSelection(event, args) {
+  const rest = await dialog
+    .showOpenDialog({
+      title: "Select a Logo",
+      properties: ["openFile"],
+      filters: [{ name: "Images", extensions: ["jpg", "png"] }],
+    })
+    .then((result) => {
+      if (result.filePaths.length === 0) {
+        return "";
+      } else {
+        return result.filePaths[0];
+      }
+    });
+
+  if (rest === "") {
+    return "";
+  }
+  var companyInfo = store.get("company-info");
+  companyInfo.logoPath = rest;
+  store.set("company-info", companyInfo);
+  return fs.readFileSync(rest).toString("base64");
+}
+
+app.whenReady().then(() => {
+  ipcMain.on("company-info", handleSaveCompanyInfo);
+  ipcMain.handle("get-company-info", getCompanyInfo);
+  ipcMain.handle("select-logo", handleLogoSelection);
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   // On macOS, it's common for an app and its menu bar to remain
