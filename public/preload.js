@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld("api", {
 
   sendCompanyInfo: (args) => ipcRenderer.send("company-info", args),
 
+  createInvoice: (args) => ipcRenderer.send("create-invoice", args),
+
   testReceive: (callback) =>
     ipcRenderer.on("test-receive", (event, data) => {
       callback(data);

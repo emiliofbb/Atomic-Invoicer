@@ -11,7 +11,10 @@ export default function NewInvoiceComponent() {
     <div style={{ overflow: "auto" }} className="w-full h-screen">
       <TopMenuInvoice />
       <ClientForm />
-      <ProductForm selectedRow={selectedRowId} />
+      <ProductForm
+        selectedRow={selectedRowId}
+        setSelectedRow={setSelectedRowId}
+      />
       <div className="px-4">
         <ProductTable />
       </div>

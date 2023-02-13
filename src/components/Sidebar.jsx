@@ -42,14 +42,14 @@ export default function Sidebar({ selectOptioner, idRender }) {
           className="mb-6 text-white underline"
           onClick={companyInfo}
         >
-          Company information
+          Información de la empresa
         </button>
         <button
           is-option="true"
           className="text-white underline"
           onClick={newInvoice}
         >
-          New Invoice!!!
+          Nueva Documento
         </button>
       </div>
     </aside>

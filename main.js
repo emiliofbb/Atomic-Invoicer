@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 
 const Store = require("electron-store");
+var easyinvoice = require("easyinvoice");
 
 const store = new Store();
 
@@ -50,18 +51,25 @@ function handleSaveCompanyInfo(event, args) {
     email: args[2],
     phone: args[3],
     address: args[4],
+    city: args[5],
+    country: args[6],
   };
   store.set("company-info", companyInfo);
 }
 
-function getCompanyInfo(event, args) {
+function getCompanyInfoWithLogo() {
   const companyInfo = store.get("company-info");
   if (companyInfo.logoPath !== undefined && companyInfo.logoPath !== "") {
     companyInfo.logoBase64 = fs
       .readFileSync(companyInfo.logoPath)
       .toString("base64");
   }
+
   return companyInfo;
+}
+
+function getCompanyInfo(event, args) {
+  return getCompanyInfoWithLogo();
 }
 
 async function handleLogoSelection(event, args) {
@@ -72,7 +80,7 @@ async function handleLogoSelection(event, args) {
       filters: [{ name: "Images", extensions: ["jpg", "png"] }],
     })
     .then((result) => {
-      if (result.filePaths.length === 0) {
+      if (result.filePaths.length === 0 || result.canceled) {
         return "";
       } else {
         return result.filePaths[0];
@@ -88,8 +96,52 @@ async function handleLogoSelection(event, args) {
   return fs.readFileSync(rest).toString("base64");
 }
 
+async function generateInvoice(event, args) {
+  const companyInfo = getCompanyInfoWithLogo();
+  const customer = args[0];
+  const products = args[1];
+  var data = {
+    client: customer,
+    sender: {
+      company: companyInfo.name,
+      address: companyInfo.address,
+      zip: "CIF: " + companyInfo.code,
+      country: companyInfo.country,
+      city: companyInfo.city,
+      custom1: "Teléfono: " + companyInfo.phone,
+      custom2: "Email: " + companyInfo.email,
+    },
+    images: {
+      logo: companyInfo.logoBase64,
+    },
+    information: {
+      date: new Date().toLocaleDateString("es-ES"),
+      number: "1",
+    },
+    products: products,
+    bottomNotice: "Firma del cliente",
+    settings: {
+      currency: "EUR",
+      "tax-notation": "IVA",
+      locale: "de-DE",
+    },
+    translate: {
+      invoice: "Factura",
+      number: "Número",
+      date: "Fecha",
+      "due-date": "Fecha de vencimiento",
+      products: "Productos",
+      quantity: "Cantidad",
+      price: "Precio",
+    },
+  };
+  const result = await easyinvoice.createInvoice(data);
+  fs.writeFileSync("invoice.pdf", result.pdf, "base64");
+}
+
 app.whenReady().then(() => {
   ipcMain.on("company-info", handleSaveCompanyInfo);
+  ipcMain.on("create-invoice", generateInvoice);
   ipcMain.handle("get-company-info", getCompanyInfo);
   ipcMain.handle("select-logo", handleLogoSelection);
   createWindow();

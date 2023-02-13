@@ -7,7 +7,17 @@ export default function TopMenuCompanyInfo() {
     const email = document.getElementById("company-email").value;
     const phone = document.getElementById("company-phone").value;
     const address = document.getElementById("company-address").value;
-    window.api.sendCompanyInfo([name, code, email, phone, address]);
+    const city = document.getElementById("company-city").value;
+    const country = document.getElementById("company-country").value;
+    window.api.sendCompanyInfo([
+      name,
+      code,
+      email,
+      phone,
+      address,
+      city,
+      country,
+    ]);
   };
 
   const restartCompanyInfo = () => {
@@ -16,15 +26,17 @@ export default function TopMenuCompanyInfo() {
     document.getElementById("company-email").value = "";
     document.getElementById("company-phone").value = "";
     document.getElementById("company-address").value = "";
+    document.getElementById("company-city").value = "";
+    document.getElementById("company-country").value = "";
     window.api.sendCompanyInfo(["", "", "", "", ""]);
   };
 
   return (
     <div className="bg-sky-400 w-full shadow-md h-16 flex flex-row justify-start px-4">
-      <h1 className="w-full self-center text-lg font-bold">Company Info</h1>
+      <h1 className="w-full self-center text-lg font-bold">Empresa</h1>
       <div className="flex flex-row justify-end">
-        <Button funcion={saveCompanyInfo}>Save</Button>
-        <Button funcion={restartCompanyInfo}>Restart</Button>
+        <Button funcion={saveCompanyInfo}>Guardar</Button>
+        <Button funcion={restartCompanyInfo}>Reiniciar</Button>
       </div>
     </div>
   );
