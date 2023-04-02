@@ -95,7 +95,7 @@ export default function ProductForm({ selectedRow, setSelectedRow }) {
           <span className="text-gray-700">Cantidad</span>
           <input
             className="form-input text-right rounded-lg block border-gray-300 shadow-sm focus:border-orange-300 focus:ring focus:ring-orange-200 focus:ring-opacity-50 w-full"
-            type="number"
+            type="text"
             placeholder="1"
             id="product-quantity"
           />
@@ -104,7 +104,7 @@ export default function ProductForm({ selectedRow, setSelectedRow }) {
           <span className="text-gray-700">Precio Unitario</span>
           <input
             className="form-input text-right rounded-lg block border-gray-300 shadow-sm focus:border-orange-300 focus:ring focus:ring-orange-200 focus:ring-opacity-50 w-full"
-            type="number"
+            type="text"
             placeholder="58,50"
             id="product-price"
           />

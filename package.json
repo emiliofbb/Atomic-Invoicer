@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "bootstrap-icons": "^1.10.3",
-    "easyinvoice": "^2.3.3",
+    "cheerio": "^1.0.0-rc.12",
+    "currency.js": "^2.0.4",
     "electron-store": "^8.1.0",
+    "puppeteer": "^19.7.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

@@ -49,7 +49,7 @@ export default function Sidebar({ selectOptioner, idRender }) {
           className="text-white underline"
           onClick={newInvoice}
         >
-          Nueva Documento
+          Nuevo Documento
         </button>
       </div>
     </aside>

@@ -10,6 +10,14 @@ export default function NewInvoiceComponent() {
   return (
     <div style={{ overflow: "auto" }} className="w-full h-screen">
       <TopMenuInvoice />
+      <div className="py-2 px-6">
+        <label className="text-xl font-bold">Tipo de documento</label>
+        <br />
+        <select id="docType" className="mt-2">
+          <option value="1">Factura</option>
+          <option value="2">Presupuesto</option>
+        </select>
+      </div>
       <ClientForm />
       <ProductForm
         selectedRow={selectedRowId}

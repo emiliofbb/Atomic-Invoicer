@@ -1,9 +1,11 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import fs from "fs";
 import path from "path";
+import currency from "currency.js";
+let cheerio = require("cheerio");
+const puppeteer = require("puppeteer");
 
 const Store = require("electron-store");
-var easyinvoice = require("easyinvoice");
 
 const store = new Store();
 
@@ -96,47 +98,127 @@ async function handleLogoSelection(event, args) {
   return fs.readFileSync(rest).toString("base64");
 }
 
+function createAddress(address, city, country) {
+  var addressTotal = address;
+
+  if (city !== "" && country !== "") {
+    addressTotal = addressTotal + ", <br/>" + city + ", " + country;
+  }
+  if (city === "" && country !== "") {
+    addressTotal = addressTotal + ", <br/>" + country;
+  }
+  if (country === "" && city !== "") {
+    addressTotal = addressTotal + ", <br/>" + city;
+  }
+
+  return addressTotal;
+}
+
+async function createPDF(html, path) {
+  // Create a browser instance
+  const browser = await puppeteer.launch();
+
+  // Create a new page
+  const page = await browser.newPage();
+
+  //Get HTML content from HTML
+  await page.setContent(html, { waitUntil: "domcontentloaded" });
+
+  // To reflect CSS used for screens instead of print
+  await page.emulateMediaType("screen");
+
+  // Downlaod the PDF
+  const pdf = await page.pdf({
+    path: path,
+    margin: { top: "10px", right: "50px", bottom: "10px", left: "50px" },
+    printBackground: true,
+    format: "A4",
+  });
+
+  // Close the browser instance
+  await browser.close();
+}
+
 async function generateInvoice(event, args) {
   const companyInfo = getCompanyInfoWithLogo();
-  const customer = args[0];
-  const products = args[1];
-  var data = {
-    client: customer,
-    sender: {
-      company: companyInfo.name,
-      address: companyInfo.address,
-      zip: "CIF: " + companyInfo.code,
-      country: companyInfo.country,
-      city: companyInfo.city,
-      custom1: "Teléfono: " + companyInfo.phone,
-      custom2: "Email: " + companyInfo.email,
-    },
-    images: {
-      logo: companyInfo.logoBase64,
-    },
-    information: {
-      date: new Date().toLocaleDateString("es-ES"),
-      number: "1",
-    },
-    products: products,
-    bottomNotice: "Firma del cliente",
-    settings: {
-      currency: "EUR",
-      "tax-notation": "IVA",
-      locale: "de-DE",
-    },
-    translate: {
-      invoice: "Factura",
-      number: "Número",
-      date: "Fecha",
-      "due-date": "Fecha de vencimiento",
-      products: "Productos",
-      quantity: "Cantidad",
-      price: "Precio",
-    },
-  };
-  const result = await easyinvoice.createInvoice(data);
-  fs.writeFileSync("invoice.pdf", result.pdf, "base64");
+  const docType = args[0];
+  const customer = args[1];
+  const products = args[2];
+
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  let mm = today.getMonth() + 1; // Months start at 0!
+  let dd = today.getDate();
+
+  if (dd < 10) dd = "0" + dd;
+  if (mm < 10) mm = "0" + mm;
+
+  const invoiceName = customer.company + dd + mm + yyyy + ".pdf";
+
+  const htmlString = fs.readFileSync(
+    path.join(app.getAppPath(), "./dist/invoices/index.html"),
+    "utf-8"
+  );
+
+  const $ = cheerio.load(htmlString);
+
+  $("#doc-type").text(docType);
+
+  // Company info insert
+
+  const addressTotal = createAddress(
+    companyInfo.address,
+    companyInfo.city,
+    companyInfo.country
+  );
+  $("#logo-img").attr("src", `data:image/jgp;base64,${companyInfo.logoBase64}`);
+  $("#company-name").text(companyInfo.name);
+  $("#company-address").append(addressTotal);
+  $("#company-tel").text(companyInfo.phone);
+  $("#company-mail").text(companyInfo.email);
+  $("#company-mail").attr("href", "mailto:" + companyInfo.email);
+
+  //Customer info insert
+  const finalCustomerAddress = createAddress(
+    customer.address,
+    customer.city,
+    customer.country
+  );
+  $("#client-name").append("<span>CLIENTE:</span> " + customer.company);
+  $("#client-address").append(
+    "<span>DIRECCIÓN:</span> " + finalCustomerAddress
+  );
+  $("#emision-date").append(
+    "<span>FECHA:</span> " + dd + "/" + mm + "/" + yyyy
+  );
+
+  const currencyOptions = { symbol: "€", decimal: ",", separator: "." };
+
+  var subtotal = currency(0, currencyOptions);
+
+  //PRODS info insert
+  products.forEach((prod, i) => {
+    const unitPrice = currency(prod.price, currencyOptions);
+    const prodPrice = unitPrice.multiply(prod.quantity);
+    subtotal = subtotal.add(prodPrice);
+    const row = `<tr>
+      <td class="service">${i}</td>
+      <td class="desc">
+        ${prod.description}
+      </td>
+      <td class="unit">${unitPrice.format()}</td>
+      <td class="qty">${prod.quantity}</td>
+      <td class="total">${prodPrice.format()}</td>
+  </tr>`;
+    $("#row-nt").before(row);
+  });
+
+  const taxValue = subtotal.multiply(0.21);
+  $("#total-no-tax").text(subtotal.format());
+  $("#tax-val").text(taxValue.format());
+  $("#total-final").text(subtotal.add(taxValue).format());
+
+  await createPDF($.html(), invoiceName);
 }
 
 app.whenReady().then(() => {

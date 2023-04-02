@@ -5,6 +5,12 @@ export default function TopMenuInvoice() {
     const data = [];
     const customer = {};
     const products = [];
+
+    const docTypeElem = document.getElementById("docType");
+    const docType = docTypeElem.options[docTypeElem.selectedIndex].text;
+
+    data.push(docType);
+
     customer.company = document.getElementById("customer-name").value;
     customer.address = document.getElementById("customer-address").value;
     customer.city = document.getElementById("customer-city").value;
